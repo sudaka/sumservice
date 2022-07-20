@@ -23,7 +23,7 @@ def getjobinfo():
     if jobid != None:
         tst = DataConnector()
         tst.result["id"] = jobid
-        if tst.getjobinfo(localreq=localreq):
+        if tst.getjobinfo(local=localreq):
             return {jobid:tst.result}
     return {jobid: {"result": "Job not in list"}}
 

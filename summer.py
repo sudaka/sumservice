@@ -44,14 +44,14 @@ class DataConnector():
         for tmpip in ['127.0.0.1', self.myip]:
             if tmpip in addrlist:
                 addrlist.remove(tmpip)
+        jobscount = 0
         for addr in addrlist:
             res = requests.get(f'http://{addr}:{self.apiport}/getjobcount?local=yes')
-            jobscount = 0
             try:
-                jobscount = json.loads(res.text)
-                jobscount = int(jobscount["result"])
+                tmpjobscount = json.loads(res.text)
+                jobscount += int(tmpjobscount["result"])
             except:
-                jobscount= 0
+                pass
         return jobscount
 
     def loadremotejobs(self):
@@ -112,8 +112,7 @@ class DataConnector():
             return True
         if not local:
             remjobs = self.loadremotejobs()
-            if self.result["id"] in remjobs.keys():
-                self.result = remjobs[self.result["id"]]
+            if remjobs:
                 return True
         return False 
 
