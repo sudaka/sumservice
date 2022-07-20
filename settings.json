@@ -2,7 +2,7 @@
     "domainname": "summer.example.com",
     "myip": "192.168.1.2",
     "apiport": "5000",
-    "dnsserver": "127.0.0.1",
+    "dnsserver": "192.168.1.2",
     "jobsfile": "jobs.json",
     "tmpdir": "C:\\projects\\sumservicedata\\"
 }

@@ -39,13 +39,12 @@ class DataConnector():
         except:
             return []
     
-    def loadremotejobs(self):
+    def loadremotejobscount(self):
         addrlist = self.getaddr(self.domainname, self.dnsserver)
-        for tmpip in ['127.0.0.1', self.myip, '192.168.1.2']:
+        for tmpip in ['127.0.0.1', self.myip]:
             if tmpip in addrlist:
                 addrlist.remove(tmpip)
         for addr in addrlist:
-            print(addr)
             res = requests.get(f'http://{addr}:{self.apiport}/getjobcount?local=yes')
             jobscount = 0
             try:
@@ -53,8 +52,24 @@ class DataConnector():
                 jobscount = int(jobscount["result"])
             except:
                 jobscount= 0
-            print(jobscount)
         return jobscount
+
+    def loadremotejobs(self):
+        addrlist = self.getaddr(self.domainname, self.dnsserver)
+        for tmpip in ['127.0.0.1', self.myip]:
+            if tmpip in addrlist:
+                addrlist.remove(tmpip)
+        jobid = self.result["id"]
+        for addr in addrlist:
+            try:
+                res = requests.get(f'http://{addr}:{self.apiport}/getjobinfo?id={jobid}&local=yes')
+                jobinfo = json.loads(res.text)
+                if jobinfo[jobid]["result"] != "Job not in list":
+                    self.result = jobinfo[jobid]
+                    return True
+            except:
+                pass
+        return False
 
     def loadjobs(self):
         try:
@@ -90,23 +105,24 @@ class DataConnector():
         else:
             return False
     
-    def getjobinfo(self):
+    def getjobinfo(self, local=False):
         jobs = self.loadjobs()
         if self.result["id"] in jobs.keys():
             self.result = jobs[self.result["id"]]
-            return True    
-        remjobs = self.loadremotejobs()
-        if self.result["id"] in remjobs.keys():
-            self.result = remjobs[self.result["id"]]
             return True
-        return {self.result["id"]: {"result": "Job not list"}}
+        if not local:
+            remjobs = self.loadremotejobs()
+            if self.result["id"] in remjobs.keys():
+                self.result = remjobs[self.result["id"]]
+                return True
+        return False 
 
     def getjobcount(self, local=False):
         count = -1
         jobs = self.loadjobs()
         count = len(jobs)
         if not local:
-            remjobs = self.loadremotejobs()
+            remjobs = self.loadremotejobscount()
             count += remjobs
         self.result["result"] = count
         if count > -1 :

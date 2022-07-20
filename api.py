@@ -16,12 +16,16 @@ def get_calculate():
 @app.get("/getjobinfo")
 def getjobinfo():
     jobid = request.args.get('id')
+    local = request.args.get('local')
+    localreq = False
+    if local == 'yes':
+        localreq = True
     if jobid != None:
         tst = DataConnector()
         tst.result["id"] = jobid
-        if tst.getjobinfo():
+        if tst.getjobinfo(localreq=localreq):
             return {jobid:tst.result}
-    return '{"result":"Unrecognized error"}' 
+    return {jobid: {"result": "Job not in list"}}
 
 @app.get("/getjobcount")
 def getjobcount():
