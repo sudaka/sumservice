@@ -15,12 +15,13 @@ D = DomainName('example.com')
 IP = '127.0.0.1'
 TTL = 5
 PORT = 53
+service = [D.summer]
 
 soa_record = SOA(
     mname=D.ns1,  # primary name server
-    rname=D.andrei,  # email of the domain administrator
+    rname=D.summer,  # email of the domain administrator
     times=(
-        201307231,  # serial number
+        202207200,  # serial number
         60 * 60 * 1,  # refresh
         60 * 60 * 3,  # retry
         60 * 60 * 24,  # expire
@@ -33,9 +34,7 @@ records = {
     D: [A(IP), MX(D.mail), soa_record] + ns_records,
     D.ns1: [A(IP)],  # MX and NS records must never point to a CNAME alias (RFC 2181 section 10.3)
     D.ns2: [A(IP)],
-    D.mail: [A(IP), A('1.2.2.3')],
-    D.andrei: [CNAME(D)],
-    D.summer: [A('12.0.0.2'), A('12.0.0.3'), A('12.0.0.4')],
+    D.summer: [A('127.0.0.1')],
 }
 
 qtypemapper = {
@@ -46,11 +45,16 @@ qtypemapper = {
     'NS': 2,
 }
 
+def balance_round_robin(curservice, currecords):
+    dd = currecords[curservice][0]
+    currecords[curservice].remove(dd)
+    currecords[curservice].append(dd)
+
+def balance_by_jobcount():
+    pass
+
 def dns_response(data):
-    srvname1 = f'summer.{D}'
-    dd = records[srvname1][0]
-    records[srvname1].remove(dd)
-    records[srvname1].append(dd)
+    balance_round_robin(service[0], records)
     request = DNSRecord.parse(data)
     #print(request)
     reply = DNSRecord(DNSHeader(id=request.header.id, qr=1, aa=1, ra=1), q=request.q)

@@ -3,6 +3,7 @@ from requests import request
 from summer import DataConnector
 import time
 import requests
+from dnslib import *
 
 #repcount = 58000
 repcount = 1000
@@ -29,9 +30,21 @@ def test_badlocalname():
     except:
         assert False
 
-def test_remotename():
+def est_remotename():
     res = requests.get('http://127.0.0.1:5000/calculate?filename=http://google.com/first?one=oisjdfasdrkjdsa')
     print(res)
+
+def test_dns_round_robin():
+    tst = DataConnector()
+    fdns = "summer.example.com"
+    dnsserver = '127.0.0.1'
+    firstreceive = tst.getaddr(fdns,dnsserver)
+    secondreceive = tst.getaddr(fdns,dnsserver)
+    for i in range(len(firstreceive)):
+        j = i-1
+        if i == 0:
+            j = len(secondreceive)-1
+        assert firstreceive[i] == secondreceive[j]
 
 def est_mid_summ():
     tst = DataConnector()
@@ -69,4 +82,4 @@ if __name__ == '__main__':
     #createbigfile('data.csv')
     #test_time()
     #est_big_summ()
-    test_goodlocalname()
+    test_dns_round_robin()

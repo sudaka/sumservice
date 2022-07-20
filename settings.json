@@ -1,11 +1,7 @@
 {
+    "domainname": "summer.example.com",
     "serverlist": ["127.0.0.1"],
-    "jobs": [
-        {
-            "id": "0",
-            "server": "0",
-            "starttime": "",
-            "status": "0"
-        }
-    ]
+    "dnsserver": "127.0.0.1",
+    "jobsfile": "jobs.json",
+    "tmpdir": "C:\\projects\\sumservicedata\\"
 }
