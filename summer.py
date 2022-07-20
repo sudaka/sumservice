@@ -46,7 +46,7 @@ class DataConnector():
                 addrlist.remove(tmpip)
         for addr in addrlist:
             print(addr)
-            res = requests.get(f'http://{addr}:{self.apiport}/getjobcount')
+            res = requests.get(f'http://{addr}:{self.apiport}/getjobcount?local=yes')
             jobscount = 0
             try:
                 jobscount = json.loads(res.text)
@@ -101,12 +101,13 @@ class DataConnector():
             return True
         return {self.result["id"]: {"result": "Job not list"}}
 
-    def getjobcount(self):
+    def getjobcount(self, local=False):
         count = -1
         jobs = self.loadjobs()
         count = len(jobs)
-        remjobs = self.loadremotejobs()
-        count += remjobs
+        if not local:
+            remjobs = self.loadremotejobs()
+            count += remjobs
         self.result["result"] = count
         if count > -1 :
             return True

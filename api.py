@@ -25,8 +25,12 @@ def getjobinfo():
 
 @app.get("/getjobcount")
 def getjobcount():
+    local = request.args.get('local')
+    localreq = False
+    if local == 'yes':
+        localreq = True
     tst = DataConnector()
-    if tst.getjobcount():
+    if tst.getjobcount(local=localreq):
         return tst.result
     return '{"result":"Unrecognized error"}' 
 
