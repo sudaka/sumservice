@@ -1,12 +1,7 @@
 from flask import Flask, request, jsonify
 from summer import DataConnector
-import socket
-import os
 
 app = Flask(__name__)
-
-hostname = socket.gethostname()
-myip = socket.gethostbyname(hostname)
 
 @app.get("/calculate")
 def get_calculate():
@@ -14,9 +9,8 @@ def get_calculate():
     if fname != None:
         tst = DataConnector()
         tst.fname = fname
-        tst.myip = myip
         if tst.createjob():
-            return tst.result
+            return tst.result   
     return '{"result":"Unrecognized error"}' 
 
 @app.get("/getjobinfo")
@@ -24,7 +18,6 @@ def getjobinfo():
     jobid = request.args.get('id')
     if jobid != None:
         tst = DataConnector()
-        tst.myip = myip
         tst.result["id"] = jobid
         if tst.getjobinfo():
             return {jobid:tst.result}
@@ -33,7 +26,6 @@ def getjobinfo():
 @app.get("/getjobcount")
 def getjobcount():
     tst = DataConnector()
-    tst.myip = myip
     if tst.getjobcount():
         return tst.result
     return '{"result":"Unrecognized error"}' 

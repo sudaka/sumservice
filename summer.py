@@ -1,5 +1,3 @@
-from fileinput import filename
-import re
 import pandas as pd
 import numpy as np
 import hashlib
@@ -8,6 +6,7 @@ import os
 import os.path
 import json
 from dnslib import DNSRecord, DNSBuffer, DNSHeader, DNSQuestion, RR
+import requests
 
 #python -m pip install flask
 
@@ -42,11 +41,20 @@ class DataConnector():
     
     def loadremotejobs(self):
         addrlist = self.getaddr(self.domainname, self.dnsserver)
-        if self.myip in addrlist:
-            addrlist.remove(self.myip)
+        for tmpip in ['127.0.0.1', self.myip, '192.168.1.2']:
+            if tmpip in addrlist:
+                addrlist.remove(tmpip)
         for addr in addrlist:
-            pass
-        return dict()
+            print(addr)
+            res = requests.get(f'http://{addr}:{self.apiport}/getjobcount')
+            jobscount = 0
+            try:
+                jobscount = json.loads(res.text)
+                jobscount = int(jobscount["result"])
+            except:
+                jobscount= 0
+            print(jobscount)
+        return jobscount
 
     def loadjobs(self):
         try:
@@ -98,7 +106,7 @@ class DataConnector():
         jobs = self.loadjobs()
         count = len(jobs)
         remjobs = self.loadremotejobs()
-        count += len(remjobs)
+        count += remjobs
         self.result["result"] = count
         if count > -1 :
             return True
@@ -164,7 +172,7 @@ class DataConnector():
 
 if __name__ == '__main__':
     tr = DataConnector()
-    tr.loadfile('data.csv')
+    #tr.loadfile()
     #print(tr.data.)
     #print(tr.data(1))
 

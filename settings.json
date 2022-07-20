@@ -1,6 +1,7 @@
 {
     "domainname": "summer.example.com",
-    "serverlist": ["127.0.0.1"],
+    "myip": "192.168.1.2",
+    "apiport": "5000",
     "dnsserver": "127.0.0.1",
     "jobsfile": "jobs.json",
     "tmpdir": "C:\\projects\\sumservicedata\\"
