@@ -2,10 +2,10 @@ import datetime
 import sys
 import time
 import threading
-import traceback
 import socketserver
 from dnslib import *
-import codecs
+import codecs, json
+from comclass import Settings
 
 class DomainName(str):
     def __getattr__(self, item):
@@ -34,7 +34,6 @@ records = {
     D: [A(IP), MX(D.mail), soa_record] + ns_records,
     D.ns1: [A(IP)],  # MX and NS records must never point to a CNAME alias (RFC 2181 section 10.3)
     D.ns2: [A(IP)],
-    D.summer: [A('192.168.51.174')],
 }
 
 qtypemapper = {
@@ -130,6 +129,18 @@ class UDPRequestHandler(BaseRequestHandler):
 
 if __name__ == '__main__':
     print("Starting nameserver...")
+    sett = []
+    try:
+        with open("settings.json") as f:
+            settings = json.load(f)
+            sett = settings["apipool"]
+    except:
+        pass
+    for addr in sett:
+        if D.summer in records.keys():
+            records[D.summer] += A(addr)
+        else:
+            records[D.summer] = [A(addr)]
     servers = [
         socketserver.ThreadingUDPServer(('', PORT), UDPRequestHandler),
         socketserver.ThreadingTCPServer(('', PORT), TCPRequestHandler),

@@ -135,32 +135,99 @@ class Jobs():
         return True
 
 class Summ():
-    def __init__(self, fname = '') -> None:
+    def __init__(self, fname = '', id = '') -> None:
         Settings(self)
         self.fname = fname
+        self.jobid = id
 
-    def getpiece(self, count, start_index):
+    def getpiece(self, start_index):
         with open(self.fname, 'r') as infile:
             reader = csv.reader(infile)
             num = 0 
             for idx, row in enumerate(reader):
                 if idx >= start_index-1:
-                    if num >= count:
+                    if num >= int(self.linesreadcount):
                         return
                     else:
                         yield row 
                         num += 1
 
+    def getfirstline(self):
+        colslist = []
+        firstline = ''
+        with open(self.fname, encoding="UTF-8") as myfile:
+            firstline = myfile.readline()
+            cols = firstline.split(',')
+            if len(cols)>9:
+                colslist=[i for i in range(0,len(cols)+1,10)]
+            colslist.remove(0)
+        jobs = Jobs().loadjobs()
+        jobs[self.jobid]["firstline"] = firstline
+        jobs[self.jobid]["colslist"] = colslist
+        jobs[self.jobid]["start_index"] = 1
+        Jobs().savejobs(jobs)
+        return (1, firstline, colslist)
+
+    def getfirstlinepd(self):
+        ind = ''
+        with open(self.fname, encoding="UTF-8") as myfile:
+            firstline = myfile.readline().replace('"', '')
+            ind = pd.Series(firstline.split(','))
+            ind=ind[ind.index%10==0]
+            ind=ind[ind.index>0]
+        jobs = Jobs().loadjobs()
+        jobs[self.jobid]["firstline"] = ind.to_dict()
+        jobs[self.jobid]["start_index"] = 2
+        Jobs().savejobs(jobs)
+        return (2, ind)
+
+    def sumbyparts(self):
+        try:
+            jobs = Jobs().loadjobs()
+            (start_index, firstline) = (0,'')
+            if "start_index" not in jobs[self.jobid].keys():
+                (start_index, firstline) = self.getfirstlinepd()
+            else:
+                firstline = jobs[self.jobid]["firstline"]
+                start_index = jobs[self.jobid]["start_index"]
+            ind = pd.Series(firstline)
+            df = pd.DataFrame(columns=ind)
+            isnext = False
+            for line in self.getpiece(start_index):
+                isnext = True
+                s1 = pd.Series(line[0].split(','))
+                s1=s1[s1.index%10==0]
+                s1=s1[s1.index>0]
+                s1 = s1.apply(lambda x: x.replace('"', ''))
+                s1 = s1.replace('', np.nan)
+                s1 = s1.fillna(0)
+                s1 = s1.astype('float', errors='raise')
+                df.loc[len(df)] = s1.values
+            #summ = json.loads(df.sum(axis=0).to_json(orient='index'))
+            summ = df.sum(axis=0).to_dict()
+            jobs = Jobs().loadjobs()
+            if start_index == 2:
+                jobs[self.jobid]["result"] = summ
+            else:
+                psumm = pd.DataFrame(columns=ind)
+                lastsumm = pd.Series(jobs[self.jobid]["result"])
+                cursumm = pd.Series(summ)
+                psumm.loc[len(psumm)] = lastsumm.values
+                psumm.loc[len(psumm)] = cursumm.values
+                summ = psumm.sum(axis=0).to_dict()
+            jobs[self.jobid]["start_index"] = start_index + int(self.linesreadcount)
+            jobs[self.jobid]["result"] = summ
+            Jobs().savejobs(jobs)
+            return {"summ":summ, "error":False, "iterable":isnext}
+        except:
+            return {"error":True, "iterable":False}
+        
+
+
     def sumallfile(self):
         #формируем список номеров столбцов для считывания
         try:
-            colslist = []
-            with open(self.fname, encoding="UTF-8") as myfile:
-                firstline = myfile.readline()
-                cols = firstline.split(',')
-                if len(cols)>9:
-                    colslist=[i for i in range(0,len(cols)+1,10)]
-                colslist.remove(0)
+            (_, colslist) = self.getfirstline()
             raw = pd.read_csv(self.fname, encoding="UTF-8", quoting=3, usecols=colslist)
             raw.rename(columns=lambda x: x.replace('"', ''), inplace=True)
             self.data = raw.applymap(lambda x: x.replace('"', ''))
@@ -171,9 +238,6 @@ class Summ():
             return {"summ":summ, "error":False, "iterable":False}
         except:
             return {"error":True, "iterable":False}
-
-    def sumbyparts(self,fname=''):
-        pass
 
 class Downloader(): 
     def __init__(self, fname = '') -> None:
@@ -219,10 +283,29 @@ class Downloader():
 
 
 if __name__ == '__main__':
-    tr = Summ(fname='data.csv_big.csv')
-    for lines in tr.getpiece(10,980000):
+    tr = Summ(fname='data.csv',id="b87775cb83cbf0511096cfb67074662a")
+    tr.sumbyparts()
+    '''
+    ind = ''
+    with open(tr.fname, encoding="UTF-8") as myfile:
+        firstline = myfile.readline().replace('"', '')
+        ind = pd.Series(firstline.split(','))
+        ind=ind[ind.index%10==0]
+        ind=ind[ind.index>0]
+    df = pd.DataFrame(columns=ind)
+    print(df.head)
+    for line in tr.getpiece(2):
         print("=====================================================================================================")
-        print(lines)
+        s1 = pd.Series(line[0].split(','))
+        s1=s1[s1.index%10==0]
+        s1 = s1.apply(lambda x: x.replace('"', ''))
+        s1=s1[s1.index>0]
+        s1 = s1.replace('', np.nan)
+        s1 = s1.fillna(0)
+        s1=s1.astype('float', errors='raise')
+        df.loc[len(df)] = s1.values
+    print(df.head)
+    '''
     #tr.loadfile()
     #print(tr.data.)
     #print(tr.data(1))
