@@ -34,7 +34,7 @@ records = {
     D: [A(IP), MX(D.mail), soa_record] + ns_records,
     D.ns1: [A(IP)],  # MX and NS records must never point to a CNAME alias (RFC 2181 section 10.3)
     D.ns2: [A(IP)],
-    D.summer: [A('192.168.1.2'),A('192.168.1.195')],
+    D.summer: [A('192.168.51.174')],
 }
 
 qtypemapper = {

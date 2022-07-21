@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from summer import DataConnector
+from comclass import Jobs
 
 app = Flask(__name__)
 
@@ -7,7 +7,7 @@ app = Flask(__name__)
 def get_calculate():
     fname = request.args.get('filename')
     if fname != None:
-        tst = DataConnector()
+        tst = Jobs()
         tst.fname = fname
         if tst.createjob():
             return tst.result   
@@ -21,7 +21,7 @@ def getjobinfo():
     if local == 'yes':
         localreq = True
     if jobid != None:
-        tst = DataConnector()
+        tst = Jobs()
         tst.result["id"] = jobid
         if tst.getjobinfo(local=localreq):
             return {jobid:tst.result}
@@ -33,7 +33,7 @@ def getjobcount():
     localreq = False
     if local == 'yes':
         localreq = True
-    tst = DataConnector()
+    tst = Jobs()
     if tst.getjobcount(local=localreq):
         return tst.result
     return '{"result":"Unrecognized error"}' 

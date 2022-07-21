@@ -1,6 +1,6 @@
 import json
 from requests import request
-from summer import DataConnector
+from comclass import Jobs, Summ
 import time
 import requests
 from dnslib import *
@@ -10,7 +10,7 @@ repcount = 1000
 
 def test_first_summ():
     #проверка правильного расчета для одного столбца
-    tst = DataConnector()
+    tst = Summ()
     tst.loadfile('data.csv')
     assert tst.result["summ"]['col9'] == 81.1310216823
 
@@ -35,7 +35,7 @@ def est_remotename():
     print(res)
 
 def test_dns_round_robin():
-    tst = DataConnector()
+    tst = Jobs()
     fdns = "summer.example.com"
     dnsserver = '127.0.0.1'
     firstreceive = tst.getaddr(fdns,dnsserver)
@@ -47,18 +47,18 @@ def test_dns_round_robin():
         assert firstreceive[i] == secondreceive[j]
 
 def est_mid_summ():
-    tst = DataConnector()
+    tst = Summ()
     tst.loadfile('data.csv_mid.csv')
     assert tst.summ['col9'] == 81131.02168233921
 
 def est_big_summ():
-    tst = DataConnector()
+    tst = Summ()
     tst.loadfile('data.csv_big.csv')
     assert tst.summ['col9'] == 4705599.257575668
 
 def est_time():
     start = time.time()
-    tst = DataConnector()
+    tst = Summ()
     tst.loadfile('data.csv_big.csv')
     end = time.time()
     timedelta = int(end-start)

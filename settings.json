@@ -1,8 +1,10 @@
 {
     "domainname": "summer.example.com",
-    "myip": "192.168.1.2",
+    "myip": "192.168.51.174",
     "apiport": "5000",
-    "dnsserver": "192.168.1.2",
+    "dnsserver": "192.168.51.174",
     "jobsfile": "jobs.json",
-    "tmpdir": "C:\\projects\\sumservicedata\\"
+    "tmpdir": "C:\\projects\\sumservicedata\\",
+    "summ_algoritm":"sumallfile",
+    "linesreadcount" : "1000"
 }
