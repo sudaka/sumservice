@@ -55,7 +55,6 @@ def balance_by_jobcount():
 def dns_response(data):
     balance_round_robin(service[0], records)
     request = DNSRecord.parse(data)
-    #print(request)
     reply = DNSRecord(DNSHeader(id=request.header.id, qr=1, aa=1, ra=1), q=request.q)
     qname = request.q.qname
     qn = str(qname)
@@ -75,7 +74,6 @@ def dns_response(data):
         for rdata in ns_records:
             reply.add_answer(RR(rname=D, rtype=QTYPE.NS, rclass=1, ttl=TTL, rdata=rdata))
         reply.add_answer(RR(rname=D, rtype=QTYPE.SOA, rclass=1, ttl=TTL, rdata=soa_record))
-    #print("---- Reply:\n", reply)
     return reply.pack()
 
 class BaseRequestHandler(socketserver.BaseRequestHandler):
@@ -95,15 +93,10 @@ class BaseRequestHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         now = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
-        #print ("\n\n%s request %s (%s %s):" % (self.__class__.__name__[:3], now, self.client_address[0],
-        #                                       self.client_address[1]))
         try:
             data = self.get_data()
-            #print(len(data), self.to_bytes(data))  # repr(data).replace('\\x', '')[1:-1]
             self.send_data(dns_response(data))
-
         except Exception:
-            #traceback.print_exc(file=sys.stderr)
             pass
 
 class TCPRequestHandler(BaseRequestHandler):

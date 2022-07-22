@@ -8,8 +8,6 @@ from dnslib import DNSRecord, DNSBuffer, DNSHeader, DNSQuestion, RR
 import requests
 import csv
 
-#python -m pip install flask
-
 class Settings:
     def __init__(self, myobj) -> None:
         try:
@@ -222,10 +220,7 @@ class Summ():
         except:
             return {"error":True, "iterable":False}
         
-
-
     def sumallfile(self):
-        #формируем список номеров столбцов для считывания
         try:
             (_, colslist) = self.getfirstline()
             raw = pd.read_csv(self.fname, encoding="UTF-8", quoting=3, usecols=colslist)
@@ -252,7 +247,7 @@ class Downloader():
     def loadfile(self):
         if self.fname.startswith('http'):
             #функция сохранения файла в локальное хранилище и передачи 
-            pass #print(hash_object.hexdigest()+'.csv')
+            pass
         else:
             if self.check_localfilename(self.fname):
                 copycmd = f'cp {self.fname} {self.tmpdir}{self.result["id"]}'
@@ -279,34 +274,3 @@ class Downloader():
         if self.check_localfilename():
             return True
         return False
-        
-
-
-if __name__ == '__main__':
-    tr = Summ(fname='data.csv',id="b87775cb83cbf0511096cfb67074662a")
-    tr.sumbyparts()
-    '''
-    ind = ''
-    with open(tr.fname, encoding="UTF-8") as myfile:
-        firstline = myfile.readline().replace('"', '')
-        ind = pd.Series(firstline.split(','))
-        ind=ind[ind.index%10==0]
-        ind=ind[ind.index>0]
-    df = pd.DataFrame(columns=ind)
-    print(df.head)
-    for line in tr.getpiece(2):
-        print("=====================================================================================================")
-        s1 = pd.Series(line[0].split(','))
-        s1=s1[s1.index%10==0]
-        s1 = s1.apply(lambda x: x.replace('"', ''))
-        s1=s1[s1.index>0]
-        s1 = s1.replace('', np.nan)
-        s1 = s1.fillna(0)
-        s1=s1.astype('float', errors='raise')
-        df.loc[len(df)] = s1.values
-    print(df.head)
-    '''
-    #tr.loadfile()
-    #print(tr.data.)
-    #print(tr.data(1))
-

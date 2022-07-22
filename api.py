@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from comclass import Jobs
 
 app = Flask(__name__)
@@ -37,10 +37,3 @@ def getjobcount():
     if tst.getjobcount(local=localreq):
         return tst.result
     return '{"result":"Unrecognized error"}' 
-
-@app.post("/countries")
-def add_country():
-    if request.is_json:
-        country = request.get_json()
-        return country, 201
-    return {"error": "Request must be JSON"}, 415

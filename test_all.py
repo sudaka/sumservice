@@ -5,11 +5,7 @@ import time
 import requests
 from dnslib import *
 
-#repcount = 58000
-repcount = 1000
-
 def test_first_summ():
-    #проверка правильного расчета для одного столбца
     tst = Summ()
     tst.loadfile('data.csv')
     assert tst.result["summ"]['col9'] == 81.1310216823
@@ -66,6 +62,8 @@ def est_time():
     print(tst.summ['col9'])
 
 def createbigfile(fname):
+    #repcount = 58000
+    repcount = 1000
     strlist = []
     with open(fname, 'r') as f:
         strlist = f.readlines()
